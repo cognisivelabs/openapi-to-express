@@ -1,0 +1,34 @@
+openapi: "3.0.3"
+info:
+  title: Petstore YAML
+  version: "1.0.0"
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      tags: [Pets]
+      responses:
+        "200":
+          description: List of pets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PetListResponse"
+components:
+  schemas:
+    Pet:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    PetListResponse:
+      type: object
+      required: [pets]
+      properties:
+        pets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pet"

@@ -1,0 +1,100 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Composition Test", "version": "1.0.0" },
+  "paths": {
+    "/events": {
+      "get": {
+        "operationId": "listEvents",
+        "tags": ["Events"],
+        "responses": {
+          "200": {
+            "description": "List of events",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EventListResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseEntity": {
+        "type": "object",
+        "required": ["id", "createdAt"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique identifier" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserEvent": {
+        "description": "An event triggered by a user action",
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseEntity" },
+          {
+            "type": "object",
+            "required": ["eventType"],
+            "properties": {
+              "eventType": { "type": "string" },
+              "metadata": { "type": "string", "nullable": true }
+            }
+          }
+        ]
+      },
+      "SystemEvent": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseEntity" },
+          {
+            "type": "object",
+            "required": ["source"],
+            "properties": {
+              "source": { "type": "string" },
+              "severity": { "type": "string", "enum": ["low", "medium", "high"] }
+            }
+          }
+        ]
+      },
+      "Event": {
+        "description": "Any event in the system",
+        "oneOf": [
+          { "$ref": "#/components/schemas/UserEvent" },
+          { "$ref": "#/components/schemas/SystemEvent" }
+        ]
+      },
+      "Notification": {
+        "description": "A notification that can be email or SMS",
+        "anyOf": [
+          { "$ref": "#/components/schemas/EmailNotification" },
+          { "$ref": "#/components/schemas/SmsNotification" }
+        ]
+      },
+      "EmailNotification": {
+        "type": "object",
+        "required": ["email", "subject"],
+        "properties": {
+          "email": { "type": "string" },
+          "subject": { "type": "string" },
+          "body": { "type": "string" }
+        }
+      },
+      "SmsNotification": {
+        "type": "object",
+        "required": ["phone", "message"],
+        "properties": {
+          "phone": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      },
+      "EventListResponse": {
+        "type": "object",
+        "required": ["events"],
+        "properties": {
+          "events": { "type": "array", "items": { "$ref": "#/components/schemas/Event" } },
+          "total": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

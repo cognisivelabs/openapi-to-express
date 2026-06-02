@@ -1,0 +1,63 @@
+{
+  "name": "@cognisivelabs/openapi-to-express",
+  "version": "0.1.0",
+  "description": "Generate Express routes, controller interfaces, and TypeScript types from an OpenAPI spec. Design-first API development.",
+  "author": "Sachin Gupta",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codebysachin/openapi-to-express"
+  },
+  "homepage": "https://github.com/codebysachin/openapi-to-express#readme",
+  "bugs": {
+    "url": "https://github.com/codebysachin/openapi-to-express/issues"
+  },
+  "keywords": [
+    "openapi",
+    "express",
+    "codegen",
+    "typescript",
+    "design-first",
+    "contract-first",
+    "api",
+    "code-generator",
+    "routes",
+    "controller"
+  ],
+  "bin": {
+    "openapi-to-express": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsc && chmod +x dist/cli.js",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "dev": "tsx src/cli.ts",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "dependencies": {
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

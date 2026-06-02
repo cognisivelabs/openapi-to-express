@@ -1,0 +1,193 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Enterprise API", "version": "1.0.0" },
+  "components": {
+    "parameters": {
+      "CorrelationId": {
+        "name": "X-Correlation-ID",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string" }
+      },
+      "TenantId": {
+        "name": "X-Tenant-ID",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string" }
+      }
+    },
+    "schemas": {
+      "Priority": {
+        "type": "object",
+        "required": ["level"],
+        "properties": {
+          "level": { "type": "integer", "enum": [1, 2, 3, 4, 5] }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": ["id", "name", "email"],
+        "properties": {
+          "id": { "type": "string", "readOnly": true, "description": "Server-generated ID" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role": { "type": "string", "default": "user", "description": "User role" },
+          "password": { "type": "string", "writeOnly": true, "description": "Only for creation" }
+        }
+      },
+      "LegacyConfig": {
+        "type": "object",
+        "deprecated": true,
+        "description": "Use NewConfig instead",
+        "properties": {
+          "setting": { "type": "string", "deprecated": true, "description": "Old setting" }
+        }
+      },
+      "AuditEntry": {
+        "type": "object",
+        "required": ["id", "timestamp", "actor"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "description": "Unique audit ID" },
+          "timestamp": { "type": "string", "format": "date-time", "description": "When the action occurred" },
+          "actor": { "type": "string", "format": "email" }
+        }
+      },
+      "Dog": {
+        "type": "object",
+        "required": ["type", "breed"],
+        "properties": {
+          "type": { "type": "string", "enum": ["dog"] },
+          "breed": { "type": "string" }
+        }
+      },
+      "Cat": {
+        "type": "object",
+        "required": ["type", "indoor"],
+        "properties": {
+          "type": { "type": "string", "enum": ["cat"] },
+          "indoor": { "type": "boolean" }
+        }
+      },
+      "Animal": {
+        "description": "A pet animal",
+        "oneOf": [
+          { "$ref": "#/components/schemas/Dog" },
+          { "$ref": "#/components/schemas/Cat" }
+        ],
+        "discriminator": {
+          "propertyName": "type"
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "required": ["code", "message", "fields"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "fields": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/orders": {
+      "post": {
+        "operationId": "createOrder",
+        "tags": ["Orders"],
+        "parameters": [
+          { "$ref": "#/components/parameters/CorrelationId" },
+          { "$ref": "#/components/parameters/TenantId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["item", "quantity"],
+                "properties": {
+                  "item": { "type": "string" },
+                  "quantity": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["orderId", "status"],
+                  "properties": {
+                    "orderId": { "type": "string" },
+                    "status": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/notes": {
+      "patch": {
+        "operationId": "updateOrderNotes",
+        "tags": ["Orders"],
+        "parameters": [
+          { "name": "orderId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notes updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuditEntry" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}": {
+      "delete": {
+        "operationId": "deleteOrder",
+        "tags": ["Orders"],
+        "deprecated": true,
+        "summary": "Delete an order",
+        "description": "Use cancelOrder instead.",
+        "parameters": [
+          { "name": "orderId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "204": {
+            "description": "Order deleted"
+          }
+        }
+      }
+    }
+  }
+}
