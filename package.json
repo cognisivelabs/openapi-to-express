@@ -6,11 +6,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/codebysachin/openapi-to-express"
+    "url": "https://github.com/cognisivelabs/openapi-to-express"
   },
-  "homepage": "https://github.com/codebysachin/openapi-to-express#readme",
+  "homepage": "https://github.com/cognisivelabs/openapi-to-express#readme",
   "bugs": {
-    "url": "https://github.com/codebysachin/openapi-to-express/issues"
+    "url": "https://github.com/cognisivelabs/openapi-to-express/issues"
   },
   "keywords": [
     "openapi",
