@@ -1,6 +1,6 @@
 {
   "name": "@cognisivelabs/openapi-to-express",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generate Express routes, controller interfaces, and TypeScript types from an OpenAPI spec. Design-first API development.",
   "author": "Sachin Gupta",
   "license": "MIT",
