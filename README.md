@@ -1,11 +1,11 @@
-# @cognisivelabs/openapi-to-express
+# openapi-to-express
 
 Generate Express routes, controller interfaces, and TypeScript types from an OpenAPI spec. Design-first API development — define your contract first, the compiler enforces it.
 
 ## Install
 
 ```bash
-npm install -D @cognisivelabs/openapi-to-express
+npm install -D openapi-to-express
 ```
 
 ## Quick Start
@@ -276,7 +276,7 @@ CLI flags override config file values.
 ## Programmatic API
 
 ```typescript
-import { generate } from "@cognisivelabs/openapi-to-express";
+import { generate } from "openapi-to-express";
 
 await generate({
   input: "openapi.json",
