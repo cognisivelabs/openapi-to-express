@@ -48,7 +48,8 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc && chmod +x dist/cli.js",
-    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:enterprise": "node --import tsx --test tests/enterprise/enterprise-specs.test.ts",
     "dev": "tsx src/cli.ts",
     "prepublishOnly": "npm run test && npm run build"
   },
