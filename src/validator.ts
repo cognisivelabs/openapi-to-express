@@ -179,14 +179,20 @@ function checkSchemaRefs(obj: any, spec: any, path: string, method: string, issu
   }
 }
 
-export function formatValidationReport(result: ValidationResult): string {
+export function formatValidationReport(result: ValidationResult, mode: "strict" | "standard" = "strict"): string {
   const lines: string[] = [];
+  const showWarnings = mode === "strict";
+
+  const filtered = showWarnings
+    ? result.issues
+    : result.issues.filter((i) => i.level === "error");
 
   lines.push("OpenAPI Code Generation Readiness Report");
+  lines.push(`Mode: ${mode}`);
   lines.push("=========================================");
   lines.push("");
 
-  if (result.issues.length === 0) {
+  if (filtered.length === 0) {
     lines.push("✅ All operations are ready for code generation.");
     lines.push("");
     lines.push(`${result.operationCount} operations, ${result.readyCount} ready.`);
@@ -195,7 +201,7 @@ export function formatValidationReport(result: ValidationResult): string {
 
   // Group issues by path+method
   const grouped = new Map<string, ValidationIssue[]>();
-  for (const issue of result.issues) {
+  for (const issue of filtered) {
     const key = issue.method ? `${issue.method.toUpperCase()} ${issue.path}` : issue.path;
     const list = grouped.get(key) ?? [];
     list.push(issue);
@@ -219,7 +225,7 @@ export function formatValidationReport(result: ValidationResult): string {
   lines.push("─────────────────────────────────────────");
   lines.push(`Summary: ${result.operationCount} operations, ${result.readyCount} ready for codegen`);
   if (errors > 0) lines.push(`  ${errors} error(s) — must fix for code generation`);
-  if (warnings > 0) lines.push(`  ${warnings} warning(s) — optional improvements`);
+  if (showWarnings && warnings > 0) lines.push(`  ${warnings} warning(s) — optional improvements`);
 
   return lines.join("\n");
 }

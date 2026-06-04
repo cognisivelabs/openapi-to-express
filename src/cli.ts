@@ -27,6 +27,7 @@ const { values } = parseArgs({
     "routes-dir": { type: "string" },
     "dry-run": { type: "boolean" },
     validate: { type: "boolean" },
+    strict: { type: "boolean" },
     watch: { type: "boolean", short: "w" },
     version: { type: "boolean", short: "v" },
     help: { type: "boolean", short: "h" },
@@ -55,7 +56,8 @@ Optional:
   --types-dir <name>           Folder name for types (default: "types")
   --controllers-dir <name>     Folder name for controller interfaces (default: "controllers")
   --routes-dir <name>          Folder name for routes (default: "routes")
-  --validate                   Check if the spec is ready for code generation (no files written)
+  --validate                   Check codegen readiness (errors only)
+  --strict                     With --validate: also show warnings
   --dry-run                    Show what would be generated without writing files
   -w, --watch                  Watch the spec file and regenerate on changes
   -v, --version                Output the version number
@@ -94,13 +96,14 @@ if (values.validate) {
     process.exit(1);
   }
 
+  const mode = values.strict ? "strict" : "standard";
   const { resolveInput } = await import("./generate.js");
   const { validateSpec, formatValidationReport } = await import("./validator.js");
 
   try {
     const spec = await resolveInput(input);
     const result = validateSpec(spec);
-    console.log(formatValidationReport(result));
+    console.log(formatValidationReport(result, mode));
     process.exit(result.issues.some((i: any) => i.level === "error") ? 1 : 0);
   } catch (err: any) {
     console.error(`Error: ${err.message}`);
