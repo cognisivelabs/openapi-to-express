@@ -237,6 +237,8 @@ Optional:
   --types-dir <name>           Folder name for types (default: "types")
   --controllers-dir <name>     Folder name for controllers (default: "controllers")
   --routes-dir <name>          Folder name for routes (default: "routes")
+  --validate                   Check if the spec is ready for code generation (errors only)
+  --strict                     With --validate: also show warnings
   --dry-run                    Show what would be generated without writing files
   -w, --watch                  Watch spec file and regenerate on changes
   -v, --version                Output version number
@@ -247,9 +249,47 @@ Examples:
   npx openapi-to-express -i openapi.yaml -o src
   npx openapi-to-express -i https://petstore3.swagger.io/api/v3/openapi.json -o src
   npx openapi-to-express -i openapi.json -o src --types-dir models --controllers-dir interfaces
+  npx openapi-to-express -i openapi.json --validate
+  npx openapi-to-express -i openapi.json --validate --strict
   npx openapi-to-express -i openapi.json -o src --dry-run
   npx openapi-to-express -i openapi.json -o src --watch
 ```
+
+## Validate Your Spec
+
+Check if your OpenAPI spec is ready for code generation before running the generator:
+
+```bash
+# Standard — show errors only (things that block code generation)
+npx openapi-to-express -i openapi.json --validate
+
+# Strict — show errors and warnings (includes optional improvements)
+npx openapi-to-express -i openapi.json --validate --strict
+```
+
+Example output for a spec with issues:
+
+```
+OpenAPI Code Generation Readiness Report
+Mode: strict
+=========================================
+
+❌ GET /.well-known/openid-configuration
+  └─ ✗ Missing operationId — cannot generate controller method name
+  └─ ✗ Response 200 has "example" but no "schema" — cannot generate response type
+
+⚠️ POST /token
+  └─ ⚠ RequestBody uses application/x-www-form-urlencoded — only application/json generates typed request body
+
+─────────────────────────────────────────
+Summary: 6 operations, 0 ready for codegen
+  2 error(s) — must fix for code generation
+  1 warning(s) — optional improvements
+```
+
+**Errors (✗)** block code generation — the spec needs schemas, operationIds, or `$ref` fixes.
+
+**Warnings (⚠)** are informational — code still generates, but some endpoints won't have typed request/response bodies.
 
 ## Config File
 
