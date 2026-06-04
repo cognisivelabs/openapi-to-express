@@ -59,16 +59,40 @@ export function safePropertyName(name: string): string {
   return isValidIdentifier(name) ? name : `"${name}"`;
 }
 
-export function enumKeyFromValue(value: any): string {
+export type EnumNaming = "PascalCase" | "camelCase" | "UPPER_CASE" | "original";
+
+export function enumKeyFromValue(value: any, naming: EnumNaming = "PascalCase"): string {
   const str = String(value);
+
+  // For "original", return as-is if it's a valid identifier, otherwise sanitize
+  if (naming === "original") {
+    const cleaned = str.replace(/[^a-zA-Z0-9_$]+/g, "_").replace(/^_+|_+$/g, "");
+    if (!cleaned || /^[0-9]/.test(cleaned)) return `Value_${cleaned}`;
+    return cleaned;
+  }
+
   const cleaned = str
     .replace(/[^a-zA-Z0-9_]+/g, "_")
     .replace(/^_+|_+$/g, "");
   if (!cleaned || /^[0-9]/.test(cleaned)) {
     return `Value_${cleaned || str.replace(/[^a-zA-Z0-9]/g, "")}`;
   }
-  return cleaned
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join("");
+
+  const parts = cleaned.split("_").filter(Boolean);
+
+  switch (naming) {
+    case "PascalCase":
+      return parts
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+        .join("");
+    case "camelCase":
+      return parts[0].toLowerCase() +
+        parts.slice(1).map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join("");
+    case "UPPER_CASE":
+      return parts.map((p) => p.toUpperCase()).join("_");
+    default:
+      return parts
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+        .join("");
+  }
 }

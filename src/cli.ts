@@ -25,6 +25,7 @@ const { values } = parseArgs({
     "types-dir": { type: "string" },
     "controllers-dir": { type: "string" },
     "routes-dir": { type: "string" },
+    "enum-naming": { type: "string" },
     "dry-run": { type: "boolean" },
     validate: { type: "boolean" },
     strict: { type: "boolean" },
@@ -56,6 +57,7 @@ Optional:
   --types-dir <name>           Folder name for types (default: "types")
   --controllers-dir <name>     Folder name for controller interfaces (default: "controllers")
   --routes-dir <name>          Folder name for routes (default: "routes")
+  --enum-naming <style>        Enum key naming: PascalCase, camelCase, UPPER_CASE, original (default: PascalCase)
   --validate                   Check codegen readiness (errors only)
   --strict                     With --validate: also show warnings
   --dry-run                    Show what would be generated without writing files
@@ -122,9 +124,12 @@ const typesDir = values["types-dir"] ?? config["types-dir"];
 const controllersDir = values["controllers-dir"] ?? config["controllers-dir"];
 const routesDir = values["routes-dir"] ?? config["routes-dir"];
 
+const enumNaming = (values["enum-naming"] ?? config["enum-naming"] ?? "PascalCase") as "PascalCase" | "camelCase" | "UPPER_CASE" | "original";
+
 const genOptions = {
   input,
   output,
+  enumNaming,
   dryRun: values["dry-run"] ?? false,
   dirs: {
     ...(typesDir && { types: typesDir }),

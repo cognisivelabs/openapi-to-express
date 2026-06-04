@@ -14,6 +14,7 @@ export interface ConfigFile {
   "types-dir"?: string;
   "controllers-dir"?: string;
   "routes-dir"?: string;
+  "enum-naming"?: string;
 }
 
 export function loadConfig(cwd: string = process.cwd()): ConfigFile | null {

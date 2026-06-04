@@ -29,6 +29,8 @@ export interface DirectoryConfig {
   routes: string;
 }
 
+export type EnumNaming = "PascalCase" | "camelCase" | "UPPER_CASE" | "original";
+
 export interface GenerateOptions {
   /** OpenAPI specification — can be a file path, URL, or JSON string content */
   input: string;
@@ -36,6 +38,8 @@ export interface GenerateOptions {
   output: string;
   /** Custom folder names for generated output */
   dirs?: Partial<DirectoryConfig>;
+  /** Enum key naming convention (default: "PascalCase") */
+  enumNaming?: EnumNaming;
   /** If true, only print what would be generated without writing files */
   dryRun?: boolean;
 }
@@ -96,6 +100,7 @@ export async function generate(options: GenerateOptions): Promise<void> {
   const dirs: DirectoryConfig = { ...DEFAULT_DIRS, ...options.dirs };
 
   const dryRun = options.dryRun ?? false;
+  const enumNaming = options.enumNaming ?? "PascalCase";
   const spec = await resolveInput(options.input);
   const parsed = parseSpec(spec);
   const { common, perTag } = classifySchemas(parsed.byTag, parsed.schemas);
@@ -137,7 +142,7 @@ export async function generate(options: GenerateOptions): Promise<void> {
 
   // 1. Common types (only if shared schemas exist)
   if (common.length > 0) {
-    const { content } = generateTypesFile(common, parsed.schemas, new Set());
+    const { content } = generateTypesFile(common, parsed.schemas, new Set(), enumNaming);
     write(dirs.types, "common.types.ts", content);
   }
 
@@ -147,7 +152,7 @@ export async function generate(options: GenerateOptions): Promise<void> {
     const tagSchemas = (perTag.get(tag) ?? []).sort();
 
     // Types
-    const { content, imports } = generateTypesFile(tagSchemas, parsed.schemas, commonSet);
+    const { content, imports } = generateTypesFile(tagSchemas, parsed.schemas, commonSet, enumNaming);
     let typesContent = "";
     if (imports.length > 0) {
       typesContent += `import type { ${imports.join(", ")} } from "./common.types";\n\n`;

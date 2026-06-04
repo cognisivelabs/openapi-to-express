@@ -11,6 +11,7 @@
 
 import { refToTypeName, collectRefsFromSchema } from "../parser/spec-parser.js";
 import { capitalize, enumKeyFromValue, safePropertyName, escapeJsDoc } from "../utils/strings.js";
+import type { EnumNaming } from "../utils/strings.js";
 
 function toTsType(schema: any): string {
   if (!schema) return "unknown";
@@ -98,6 +99,7 @@ export function generateTypesFile(
   schemaNames: string[],
   allSchemas: Record<string, any>,
   definedElsewhere: Set<string>,
+  enumNaming: EnumNaming = "PascalCase",
 ): { content: string; imports: string[] } {
   const defined = new Set(schemaNames);
   const imports = new Set<string>();
@@ -164,8 +166,13 @@ export function generateTypesFile(
       if (schema.description) {
         lines.push(`/** ${escapeJsDoc(schema.description)} */`);
       }
-      const tsType = toTsType(schema);
-      lines.push(`export type ${name} = ${tsType};`);
+      if (schema.enum) {
+        // Root-level enum — generate const object + type
+        enums.push({ name, values: schema.enum });
+        lines.push(`export type ${name} = (typeof ${name})[keyof typeof ${name}];`);
+      } else {
+        lines.push(`export type ${name} = ${toTsType(schema)};`);
+      }
       lines.push("");
       continue;
     }
@@ -226,12 +233,15 @@ export function generateTypesFile(
     for (const e of enums) {
       lines.push(`export const ${e.name} = {`);
       for (const val of e.values) {
-        const key = typeof val === "string" ? enumKeyFromValue(val) : `Value${val}`;
+        const key = typeof val === "string" ? enumKeyFromValue(val, enumNaming) : `Value${val}`;
         const literal = typeof val === "string" ? `"${val}"` : String(val);
         lines.push(`  ${key}: ${literal},`);
       }
       lines.push(`} as const;`);
-      lines.push(`export type ${e.name} = (typeof ${e.name})[keyof typeof ${e.name}];`);
+      // Only emit type alias if not already emitted for root-level enums
+      if (!lines.some((l) => l === `export type ${e.name} = (typeof ${e.name})[keyof typeof ${e.name}];`)) {
+        lines.push(`export type ${e.name} = (typeof ${e.name})[keyof typeof ${e.name}];`);
+      }
       lines.push("");
     }
   }
