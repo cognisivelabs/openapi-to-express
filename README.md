@@ -237,6 +237,7 @@ Optional:
   --types-dir <name>           Folder name for types (default: "types")
   --controllers-dir <name>     Folder name for controllers (default: "controllers")
   --routes-dir <name>          Folder name for routes (default: "routes")
+  --enum-naming <style>        Enum key naming: PascalCase, camelCase, UPPER_CASE, original (default: PascalCase)
   --validate                   Check if the spec is ready for code generation (errors only)
   --strict                     With --validate: also show warnings
   --dry-run                    Show what would be generated without writing files
@@ -304,7 +305,8 @@ Create `.openapi-to-expressrc.json` in your project root to avoid repeating CLI 
   "output": "src",
   "types-dir": "types",
   "controllers-dir": "controllers",
-  "routes-dir": "routes"
+  "routes-dir": "routes",
+  "enum-naming": "PascalCase"
 }
 ```
 
@@ -333,6 +335,25 @@ await generate({
 });
 ```
 
+## Enum Naming
+
+Control how enum keys are generated with `--enum-naming`:
+
+```bash
+npx openapi-to-express -i spec.json -o src --enum-naming UPPER_CASE
+```
+
+Given `enum: ["active", "pending", "sold"]`:
+
+| Style | Generated keys |
+|---|---|
+| `PascalCase` (default) | `Active`, `Pending`, `Sold` |
+| `camelCase` | `active`, `pending`, `sold` |
+| `UPPER_CASE` | `ACTIVE`, `PENDING`, `SOLD` |
+| `original` | `active`, `pending`, `sold` |
+
+Set it once in `.openapi-to-expressrc.json` to avoid repeating on every call.
+
 ## Supported OpenAPI Features
 
 ### Schemas
@@ -343,8 +364,9 @@ await generate({
 | `type: string / number / integer / boolean` | `string`, `number`, `boolean` |
 | `type: array` | `Type[]` |
 | `$ref` | Resolved type name |
-| `enum` (string) | Named `const` object + type alias |
+| `enum` (string) | Named `const` object + type alias (configurable key naming) |
 | `enum` (integer) | Named `const` object with number values |
+| Root-level enum schemas | `const` object + type alias (not inline union) |
 | `required` / optional | Required fields, `?` for optional |
 | `nullable: true` | `Type \| null` |
 | `allOf` with `$ref` + properties | `interface Child extends Base { ... }` |

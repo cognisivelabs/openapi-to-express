@@ -148,3 +148,57 @@ describe("generateExpressRoutes", () => {
   });
 });
 
+describe("enum naming conventions", () => {
+  const schemas = { "Status": { type: "string", enum: ["active_user", "pending_review", "sold_out"] } };
+
+  it("PascalCase (default)", () => {
+    const { content } = generateTypesFile(["Status"], schemas, new Set(), "PascalCase");
+    assert.ok(content.includes('ActiveUser: "active_user"'));
+    assert.ok(content.includes('PendingReview: "pending_review"'));
+  });
+
+  it("camelCase", () => {
+    const { content } = generateTypesFile(["Status"], schemas, new Set(), "camelCase");
+    assert.ok(content.includes('activeUser: "active_user"'));
+    assert.ok(content.includes('pendingReview: "pending_review"'));
+  });
+
+  it("UPPER_CASE", () => {
+    const { content } = generateTypesFile(["Status"], schemas, new Set(), "UPPER_CASE");
+    assert.ok(content.includes('ACTIVE_USER: "active_user"'));
+    assert.ok(content.includes('PENDING_REVIEW: "pending_review"'));
+  });
+
+  it("original", () => {
+    const { content } = generateTypesFile(["Status"], schemas, new Set(), "original");
+    assert.ok(content.includes('active_user: "active_user"'));
+    assert.ok(content.includes('pending_review: "pending_review"'));
+  });
+});
+
+describe("root-level enum schemas", () => {
+  const schemas = {
+    "OrderStatus": { type: "string", enum: ["placed", "shipped", "delivered"] },
+    "Priority": { type: "integer", enum: [1, 2, 3] },
+  };
+
+  it("generates const object for root-level string enum", () => {
+    const { content } = generateTypesFile(["OrderStatus"], schemas, new Set());
+    assert.ok(content.includes("export const OrderStatus = {"));
+    assert.ok(content.includes('Placed: "placed"'));
+    assert.ok(content.includes("export type OrderStatus ="));
+  });
+
+  it("generates const object for root-level integer enum", () => {
+    const { content } = generateTypesFile(["Priority"], schemas, new Set());
+    assert.ok(content.includes("export const Priority = {"));
+    assert.ok(content.includes("Value1: 1,"));
+    assert.ok(content.includes("export type Priority ="));
+  });
+
+  it("does not generate inline union for root enums", () => {
+    const { content } = generateTypesFile(["OrderStatus"], schemas, new Set());
+    assert.ok(!content.includes('export type OrderStatus = "placed" | "shipped" | "delivered"'));
+  });
+});
+
