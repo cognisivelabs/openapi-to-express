@@ -274,17 +274,20 @@ OpenAPI Code Generation Readiness Report
 Mode: strict
 =========================================
 
-❌ GET /.well-known/openid-configuration
+❌ GET /users
   └─ ✗ Missing operationId — cannot generate controller method name
+  └─ ⚠ No tags — will be grouped under "Default"
+
+❌ POST /users
   └─ ✗ Response 200 has "example" but no "schema" — cannot generate response type
 
-⚠️ POST /token
-  └─ ⚠ RequestBody uses application/x-www-form-urlencoded — only application/json generates typed request body
+⚠️ GET /users/{id}
+  └─ ⚠ No tags — will be grouped under "Default"
 
 ─────────────────────────────────────────
-Summary: 6 operations, 0 ready for codegen
+Summary: 3 operations, 1 ready for codegen
   2 error(s) — must fix for code generation
-  1 warning(s) — optional improvements
+  2 warning(s) — optional improvements
 ```
 
 **Errors (✗)** block code generation — the spec needs schemas, operationIds, or `$ref` fixes.
