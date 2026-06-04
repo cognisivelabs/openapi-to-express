@@ -66,7 +66,7 @@ function parseSpecContent(raw: string, hint?: string): any {
   }
 }
 
-async function resolveInput(input: string): Promise<any> {
+export async function resolveInput(input: string): Promise<any> {
   // URL
   if (input.startsWith("http://") || input.startsWith("https://")) {
     const res = await fetch(input);

@@ -26,6 +26,7 @@ const { values } = parseArgs({
     "controllers-dir": { type: "string" },
     "routes-dir": { type: "string" },
     "dry-run": { type: "boolean" },
+    validate: { type: "boolean" },
     watch: { type: "boolean", short: "w" },
     version: { type: "boolean", short: "v" },
     help: { type: "boolean", short: "h" },
@@ -54,6 +55,7 @@ Optional:
   --types-dir <name>           Folder name for types (default: "types")
   --controllers-dir <name>     Folder name for controller interfaces (default: "controllers")
   --routes-dir <name>          Folder name for routes (default: "routes")
+  --validate                   Check if the spec is ready for code generation (no files written)
   --dry-run                    Show what would be generated without writing files
   -w, --watch                  Watch the spec file and regenerate on changes
   -v, --version                Output the version number
@@ -83,6 +85,28 @@ const config = loadConfig() ?? {};
 
 const input = values.input ?? config.input;
 const output = values.output ?? config.output;
+
+// Validate mode — only needs input
+if (values.validate) {
+  if (!input) {
+    console.error("Error: --input is required for validation.\n");
+    console.error("Usage: openapi-to-express --input openapi.json --validate");
+    process.exit(1);
+  }
+
+  const { resolveInput } = await import("./generate.js");
+  const { validateSpec, formatValidationReport } = await import("./validator.js");
+
+  try {
+    const spec = await resolveInput(input);
+    const result = validateSpec(spec);
+    console.log(formatValidationReport(result));
+    process.exit(result.issues.some((i: any) => i.level === "error") ? 1 : 0);
+  } catch (err: any) {
+    console.error(`Error: ${err.message}`);
+    process.exit(1);
+  }
+}
 
 if (!input || !output) {
   console.error("Error: --input and --output are required (via CLI flags or .openapi-to-expressrc.json).\n");
