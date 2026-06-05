@@ -80,11 +80,11 @@ export function validateSpec(spec: any): ValidationResult {
       const responses = operation.responses ?? {};
       const successCodes = ["200", "201", "202"];
       let hasSuccessSchema = false;
-      let has204 = false;
+      let hasVoidResponse = false;
 
       for (const [code, response] of Object.entries<any>(responses)) {
-        if (code === "204") {
-          has204 = true;
+        if (code === "204" || code === "302") {
+          hasVoidResponse = true;
           hasSuccessSchema = true;
           continue;
         }
@@ -117,9 +117,9 @@ export function validateSpec(spec: any): ValidationResult {
         }
       }
 
-      if (!hasSuccessSchema && !has204 && Object.keys(responses).length > 0) {
+      if (!hasSuccessSchema && !hasVoidResponse && Object.keys(responses).length > 0) {
         const codes = Object.keys(responses).join(", ");
-        issues.push({ level: "warning", path, method, message: `No success response (200/201/202/204) found — only has: ${codes}` });
+        issues.push({ level: "warning", path, method, message: `No success response (200/201/202/204/302) found — only has: ${codes}` });
       }
 
       // Error responses — check for schemas

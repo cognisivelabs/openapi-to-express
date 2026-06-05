@@ -105,7 +105,7 @@ export function parseSpec(spec: any): ParsedSpec {
   }
 
   const HTTP_METHODS = new Set(["get", "put", "post", "delete", "options", "head", "patch", "trace"]);
-  const SUCCESS_CODES = ["200", "201", "202", "204"];
+  const SUCCESS_CODES = ["200", "201", "202", "204", "302"];
 
   for (const [path, pathItem] of Object.entries<any>(spec.paths ?? {})) {
     for (const [method, operation] of Object.entries<any>(pathItem)) {
@@ -130,8 +130,8 @@ export function parseSpec(spec: any): ParsedSpec {
       for (const code of SUCCESS_CODES) {
         const response = operation.responses?.[code];
         if (response) {
-          if (code === "204") {
-            // 204 No Content — void return, no body
+          if (code === "204" || code === "302") {
+            // 204 No Content / 302 Redirect — void return, no body
             responseType = "void";
             break;
           }
