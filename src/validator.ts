@@ -68,9 +68,8 @@ export function validateSpec(spec: any): ValidationResult {
           const formContent = content["application/x-www-form-urlencoded"];
           if (!formContent.schema) {
             issues.push({ level: "warning", path, method, message: "RequestBody uses application/x-www-form-urlencoded without schema" });
-          } else {
-            issues.push({ level: "warning", path, method, message: "RequestBody uses application/x-www-form-urlencoded — only application/json generates typed request body" });
           }
+          // Has schema — we support it, no warning needed
         } else {
           const contentTypes = Object.keys(content).join(", ");
           issues.push({ level: "warning", path, method, message: `RequestBody uses unsupported content type: ${contentTypes} — only application/json generates types` });

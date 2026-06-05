@@ -166,12 +166,12 @@ describe("validateSpec — form-urlencoded", () => {
   };
   const result = validateSpec(spec);
 
-  it("warns about form-urlencoded", () => {
-    const warnings = result.issues.filter((i) => i.level === "warning");
-    assert.ok(warnings.some((w) => w.message.includes("x-www-form-urlencoded")));
+  it("does not warn when form-urlencoded has schema", () => {
+    const warnings = result.issues.filter((i) => i.level === "warning" && i.message.includes("x-www-form-urlencoded"));
+    assert.equal(warnings.length, 0);
   });
 
-  it("still marks as ready", () => {
+  it("marks as ready", () => {
     assert.equal(result.readyCount, 1);
   });
 });

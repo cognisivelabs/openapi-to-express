@@ -117,7 +117,11 @@ export function parseSpec(spec: any): ParsedSpec {
       let requestType: string | null = null;
       let requestRequired = true;
       if (operation.requestBody) {
-        const bodySchema = operation.requestBody.content?.["application/json"]?.schema;
+        const content = operation.requestBody.content ?? {};
+        const bodySchema = (
+          content["application/json"]?.schema ??
+          content["application/x-www-form-urlencoded"]?.schema
+        );
         requestType = resolveSchema(bodySchema, operation.operationId, "Request", schemas);
         requestRequired = operation.requestBody.required ?? false;
       }
